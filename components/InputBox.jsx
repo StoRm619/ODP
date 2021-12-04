@@ -3,12 +3,15 @@ import Image from "next/image"
 import { EmojiHappyIcon } from '@heroicons/react/outline'
 import { CameraIcon, VideoCameraIcon } from '@heroicons/react/solid'
 import { db } from "../firebase";
-import { useRef } from "react";
-import firebase from 'firebase/app'
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { useRef, useState } from "react";
+import { collection, addDoc, serverTimestamp, doc, setDoc } from "firebase/firestore";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 function InputBox() {
     const [session] = useSession();
-    const inputRef = useRef(null)
+    const inputRef = useRef(null);
+    const filepickerRef = useRef(null);
+    const [imageToPost, setImageToPost] = useState(null);
+    const storage = getStorage();
     const sendPost = (e) => {
         e.preventDefault();
         if (!inputRef.current.value) return;
@@ -19,8 +22,41 @@ function InputBox() {
             email: session.user.email,
             image: session.user.image,
             timestamp: serverTimestamp(),
+        }).then(docum => {
+
+            if (imageToPost) {
+                const storage = getStorage();
+                const storageRef = ref(storage, `posts/${docum.id}`);
+                const uploadTask = uploadBytesResumable(storageRef, imageToPost, "data_url");
+
+                uploadTask.on('state_changed', null,
+                    (error) => {
+                        console.log(error);
+                    },
+                    () => {
+                        getDownloadURL(uploadTask.snapshot.ref)
+                            .then((URL) => {
+                                setDoc(doc(db, "posts", docum.id), { postImage: URL }, { merge: true });
+                            });
+                    }
+                )
+                removeImage();
+            };
         });
         inputRef.current.value = ""
+    }
+    const addImageToPost = (e) => {
+        e.preventDefault();
+        const reader = new FileReader();
+        if (e.target.files[0]) {
+            reader.readAsDataURL(e.target.files[0]);
+        }
+        reader.onload = (readerEvent) => {
+            setImageToPost(readerEvent.target.result)
+        }
+    }
+    const removeImage = () => {
+        setImageToPost(null)
     }
     return (
         <div className="bg-white p-2 rounded-2xl shadow-md text-gray-500 font-medium mt-6">
@@ -42,6 +78,13 @@ function InputBox() {
                         Sumbit
                     </button>
                 </form>
+                {imageToPost && (
+                    <div onClick={removeImage} className="flex flex-col filter hover:brightness-110 transition duration-150 transform
+                    hover:scale-105 cursor-pointer">
+                        <img className="h-10 object-contain" src={imageToPost} alt="" />
+                        <p className="text-xs text-red-500 text-center">Remove</p>
+                    </div>
+                )}
             </div>
             <div className="flex justify-evenly p-3 border-t">
                 <div className="inputIcon">
@@ -51,11 +94,13 @@ function InputBox() {
                     </p>
                 </div>
 
-                <div className="inputIcon">
+                <div onClick={() => filepickerRef.current.click()} className="inputIcon">
                     <CameraIcon className="h-7 text-green-400" />
                     <p className="text-xs sm:text-sm xl:text-base">
-                        LiveVideo
-                    </p></div>
+                        Pic
+                    </p>
+                    <input ref={filepickerRef} onChange={addImageToPost} type="file" hidden></input>
+                </div>
 
                 <div className="inputIcon">
                     <EmojiHappyIcon className="h-7 text-yellow-300" />
