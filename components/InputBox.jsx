@@ -11,7 +11,6 @@ function InputBox() {
     const inputRef = useRef(null);
     const filepickerRef = useRef(null);
     const [imageToPost, setImageToPost] = useState(null);
-    const storage = getStorage();
     const sendPost = (e) => {
         e.preventDefault();
         if (!inputRef.current.value) return;
@@ -28,7 +27,7 @@ function InputBox() {
                 const storage = getStorage();
                 const storageRef = ref(storage, `posts/${docum.id}`);
                 const uploadTask = uploadBytesResumable(storageRef, imageToPost, "data_url");
-
+                removeImage();
                 uploadTask.on('state_changed', null,
                     (error) => {
                         console.log(error);
@@ -40,7 +39,7 @@ function InputBox() {
                             });
                     }
                 )
-                removeImage();
+
             };
         });
         inputRef.current.value = ""
@@ -97,7 +96,7 @@ function InputBox() {
                 <div onClick={() => filepickerRef.current.click()} className="inputIcon">
                     <CameraIcon className="h-7 text-green-400" />
                     <p className="text-xs sm:text-sm xl:text-base">
-                        Pic
+                        Photo/Video
                     </p>
                     <input ref={filepickerRef} onChange={addImageToPost} type="file" hidden></input>
                 </div>
@@ -105,7 +104,7 @@ function InputBox() {
                 <div className="inputIcon">
                     <EmojiHappyIcon className="h-7 text-yellow-300" />
                     <p className="text-xs sm:text-sm xl:text-base">
-                        LiveVideo
+                        Emotion
                     </p></div>
 
             </div>

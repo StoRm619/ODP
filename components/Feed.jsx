@@ -1,5 +1,6 @@
 import Stories from "./Stories"
 import InputBox from "./InputBox"
+import Posts from "./Posts"
 function Feed() {
 
     return (
@@ -9,6 +10,7 @@ function Feed() {
             lg:max-w-2xl">
                 <Stories />
                 <InputBox />
+                <Posts />
             </div>
         </div>
     )
