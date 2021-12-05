@@ -47,13 +47,8 @@ function InputBox() {
         const storage = getStorage();
         const storageRef = ref(storage, `posts/${docum.id}`);
         const uploadTask = await uploadString(storageRef, imageToPost, 'data_url');
-
         const url = await getDownloadURL(uploadTask.ref)
-        console.log(url)
         await setDoc(doc(db, "posts", docum.id), { postImage: url }, { merge: true });
-
-
-
     }
     const removeImage = () => {
         setImageToPost(null)
