@@ -5,7 +5,7 @@ import { CameraIcon, VideoCameraIcon } from '@heroicons/react/solid'
 import { db } from "../firebase";
 import { useRef, useState } from "react";
 import { collection, addDoc, serverTimestamp, doc, setDoc } from "firebase/firestore";
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { getStorage, ref, uploadBytesResumable, uploadString, getDownloadURL } from "firebase/storage";
 function InputBox() {
     const [session] = useSession();
     const inputRef = useRef(null);
@@ -24,22 +24,11 @@ function InputBox() {
         }).then(docum => {
 
             if (imageToPost) {
-                const storage = getStorage();
-                const storageRef = ref(storage, `posts/${docum.id}`);
-                const uploadTask = uploadBytesResumable(storageRef, imageToPost, "data_url");
-                removeImage();
-                uploadTask.on('state_changed', null,
-                    (error) => {
-                        console.log(error);
-                    },
-                    () => {
-                        getDownloadURL(uploadTask.snapshot.ref)
-                            .then((URL) => {
-                                setDoc(doc(db, "posts", docum.id), { postImage: URL }, { merge: true });
-                            });
-                    }
-                )
+                attachPic(imageToPost, docum)
 
+
+
+                removeImage();
             };
         });
         inputRef.current.value = ""
@@ -53,6 +42,18 @@ function InputBox() {
         reader.onload = (readerEvent) => {
             setImageToPost(readerEvent.target.result)
         }
+    }
+    const attachPic = async (imageToPost, docum) => {
+        const storage = getStorage();
+        const storageRef = ref(storage, `posts/${docum.id}`);
+        const uploadTask = await uploadString(storageRef, imageToPost, 'data_url');
+
+        const url = await getDownloadURL(uploadTask.ref)
+        console.log(url)
+        await setDoc(doc(db, "posts", docum.id), { postImage: url }, { merge: true });
+
+
+
     }
     const removeImage = () => {
         setImageToPost(null)
