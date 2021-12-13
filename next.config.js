@@ -3,7 +3,8 @@ module.exports = {
     domains: ['links.papareact.com',
       "platform-lookaside.fbsbx.com",
       "firebasestorage.googleapis.com",
-      "scontent-lax3-1.xx.fbcdn.net"
+      "scontent-lax3-1.xx.fbcdn.net",
+      "avatars.githubusercontent.com"
     ],
   },
 }
