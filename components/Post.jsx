@@ -1,7 +1,21 @@
+import { useState, useRef } from "react"
 import Image from "next/image"
 import { ChatAltIcon, ShareIcon, ThumbUpIcon } from "@heroicons/react/outline"
 
 function Post({ name, message, email, timestamp, image, postImage }) {
+    const [showComment, setShowComment] = useState(false)
+    const inputRef = useRef(null);
+    const showCommetInput = (e) => {
+        e.preventDefault();
+        setShowComment(true)
+
+    }
+
+    const sendCommentInput = (e) => {
+        e.preventDefault();
+        console.log(inputRef.current.value)
+        setShowComment(false)
+    }
 
     return (
         <div className="flex flex-col">
@@ -28,10 +42,30 @@ function Post({ name, message, email, timestamp, image, postImage }) {
                     <ThumbUpIcon className='h-4' />
                     <p className="text-xs sm:text-base">Like</p>
                 </div>
-                <div className="inputIcon rounded-none">
-                    <ChatAltIcon className='h-4' />
-                    <p className="text-xs sm:text-base">Comment</p>
-                </div>
+
+                {showComment ?
+                    <>
+                        <form className="flex flex-1"><input
+                            className=" h-12 bg-gray-100 flex-grow px-5 focus:outline-none"
+                            type="text"
+                            ref={inputRef}
+                            placeholder={`Enter Comment ${name}`}
+                        >
+                        </input>
+                            <button onClick={sendCommentInput}>
+                                Sumbit
+                            </button>
+                        </form>
+                    </> :
+                    <div className="inputIcon rounded-none" onClick={showCommetInput}>
+                        <ChatAltIcon className='h-4' />
+                        <p className="text-xs sm:text-base">Comment</p>
+                    </div>
+
+                }
+
+
+
                 <div className="inputIcon rounded-none rounded-br-2xl">
                     <ShareIcon className='h-4' />
                     <p className="text-xs sm:text-base">Share</p>
